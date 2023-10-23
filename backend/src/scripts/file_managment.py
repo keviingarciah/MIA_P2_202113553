@@ -2,7 +2,7 @@
 from colorama import init, Fore
 
 # Modules
-from main import CARNET, mounted_partitions, logged
+from backend.src.terminal import CARNET, mounted_partitions, logged
 from structs.superblock import SuperBlock, SUPERBLOCK_SIZE
 from structs.inode import Inode, INODE_SIZE
 from structs.folder_block import FolderBlock, CONTENT_SIZE

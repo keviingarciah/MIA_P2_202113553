@@ -6,7 +6,7 @@ import math
 from colorama import Fore, init
 
 # Modules
-from main import mounted_partitions, CARNET
+from backend.src.terminal import mounted_partitions, CARNET
 from structs.mbr import MBR, MBR_SIZE
 from structs.partition import Partition, MountedPartition
 from structs.ebr import EBR, recursive_ebr_operation

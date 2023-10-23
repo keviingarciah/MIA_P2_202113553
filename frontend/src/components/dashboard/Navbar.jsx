@@ -10,7 +10,7 @@ const Navbar = () => {
         <div class="collapse navbar-collapse" id="navbarNavDropdown">
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <Link to="/reports" className="nav-link text-white">Report</Link>
+                    <Link to="/reports" className="nav-link text-white">Reportes</Link>
                 </li>
             </ul>    
         </div>        
