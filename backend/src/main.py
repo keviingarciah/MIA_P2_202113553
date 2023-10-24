@@ -1,3 +1,7 @@
+# Modules
+import execution
+
+# Libraries
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import time
@@ -26,15 +30,10 @@ def execute_code():
     #  Obtener script enviado por el cliente
     content = data.get("inputText", "")
 
-    # print(content)
+    # Ejecutar el código
+    message = execution.execute(content)
 
-    # Aquí puedes ejecutar el código y obtener la salida
-    output = content
-
-    # Esperamos 1 segundo, para simular proceso de ejecución
-    # time.sleep(1)
-
-    return jsonify({"message": output})
+    return jsonify({"message": message})
 
 
 if __name__ == "__main__":

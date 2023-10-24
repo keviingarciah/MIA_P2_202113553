@@ -40,7 +40,7 @@ const Terminal = () => {
       const line = inputLines[currentIndex].trim();
       
       if (line.toLowerCase() === "pause") {
-        alert("Se encontró la palabra 'pause'. La ejecución se detendrá temporalmente.");
+        alert("[PAUSE] Oprima el botón para continuar.");
         currentIndex++; // Salta a la siguiente línea
         continue; // Salta al siguiente ciclo del bucle
       }

@@ -4,7 +4,7 @@ from colorama import Fore, init
 
 # Modules
 from graphviz import Source
-from backend.src.terminal import mounted_partitions
+from backend.src.execution import mounted_partitions
 from structs.mbr import MBR, MBR_SIZE
 from structs.ebr import EBR, EBR_SIZE
 from structs.superblock import SuperBlock, SUPERBLOCK_SIZE

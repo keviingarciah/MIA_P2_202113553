@@ -3,7 +3,7 @@ import re
 from colorama import Fore, init
 
 # Module
-from backend.src.terminal import CARNET, mounted_partitions, logged
+from backend.src.execution import CARNET, mounted_partitions, logged
 from structs.user import Logged, User, Group
 from structs.partition import Partition, MountedPartition
 from structs.superblock import SuperBlock, SUPERBLOCK_SIZE
