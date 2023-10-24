@@ -24,8 +24,6 @@ const Terminal = () => {
   };
 
   const executeCode = async () => {
-    setOutputText(''); // Limpia el contenido de salida
-
     if (isExecuting) {
       return;
     }
@@ -34,16 +32,11 @@ const Terminal = () => {
   
     const inputLines = inputText.split('\n');
     const outputLines = [];
-    let currentIndex = 0;
     
-    while (currentIndex < inputLines.length) {
-      const line = inputLines[currentIndex].trim();
+    for (let i = 0; i < inputLines.length; i++) {
+      const line = inputLines[i].trim();
       
-      if (line.toLowerCase() === "pause") {
-        alert("[PAUSE] Oprima el botón para continuar.");
-        currentIndex++; // Salta a la siguiente línea
-        continue; // Salta al siguiente ciclo del bucle
-      }
+
   
       try {
         const response = await fetch(`${API}/execute`, {
@@ -69,13 +62,16 @@ const Terminal = () => {
         console.error('Error:', error);
         outputLines.push(`Error: ${error.message}`);
       }
-  
-      currentIndex++; // Avanza al siguiente índice para procesar la siguiente línea
-    }
-    
+
+      if (line.toLowerCase() === "pause") {
+        await new Promise((resolve) => {
+          alert("[PAUSA] Oprime el botón para continuar.");
+          resolve(); // Continuar cuando se resuelva la promesa (cuando el usuario cierre la alerta)
+        });
+      }
+    }  
     setIsExecuting(false);
-  };
-  
+  };  
     
   return (
     <div className="card">

@@ -122,11 +122,14 @@ lexer = lex.lex()
 from colorama import Fore, init
 
 # Imports
-from scripts.disk_managment import MKDISK, FDISK, RMDISK, MOUNT, UNMOUNT, MKFS
-from scripts.user_managment import LOGIN, LOGOUT, MKGRP, RMGRP, MKUSR, RMUSR, CHGRP
-from scripts.file_managment import MKDIR, MKFILE, CAT, REMOVE, EDIT, RENAME
-from scripts.extra import EXECUTE, PAUSE
+from scripts.disk_managment import MKDISK, FDISK, RMDISK, MOUNT, MKFS
+from scripts.user_managment import LOGIN, LOGOUT, MKGRP, RMGRP, MKUSR, RMUSR
+from scripts.file_managment import MKDIR, MKFILE
+from scripts.extra import PAUSE
 from scripts.report_generation import REP
+
+# Mensaje
+message = "Inicializando..."
 
 # Inicializar Colorama
 init(autoreset=True)
@@ -136,7 +139,6 @@ mkdisk_instance = MKDISK()
 fdisk_instance = FDISK()
 rmdisk_instance = RMDISK()
 mount_instance = MOUNT()
-unmount_instance = UNMOUNT()
 mkfs_instance = MKFS()
 # User Management
 login_instance = LOGIN()
@@ -145,16 +147,10 @@ mkgrp_instance = MKGRP()
 rmgrp_instance = RMGRP()
 mkusr_instance = MKUSR()
 rmusr_instance = RMUSR()
-chgrp_instance = CHGRP()
 # File Management
 mkdir_instance = MKDIR()
 mkfile_instance = MKFILE()
-cat_instance = CAT()
-remove_instance = REMOVE()
-edit_instance = EDIT()
-rename_instance = RENAME()
 # Extra
-exec_instance = EXECUTE()
 pause_instance = PAUSE()
 # Report
 rep_instance = REP()
@@ -163,7 +159,6 @@ rep_instance = REP()
 # Begin
 def p_begin(p):
     "begin : command"
-    # print("Comienzo detectado")
 
 
 # ------------------ COMMAND ------------------
@@ -172,7 +167,6 @@ def p_command(p):
     | RMDISK rmdisk_parameter
     | FDISK fdisk_parameters
     | MOUNT mount_parameters
-    | UNMOUNT unmount_parameter
     | MKFS mkfs_parameters
 
     | LOGIN login_parameters
@@ -181,75 +175,58 @@ def p_command(p):
     | RMGRP rmgrp_parameter
     | MKUSR mkusr_parameters
     | RMUSR rmusr_parameter
-    | CHGRP chgrp_parameters
 
     | MKFILE mkfile_parameters
-    | CAT cat_parameters
-    | REMOVE remove_parameter
-    | EDIT edit_parameters
-    | RENAME rename_parameters
     | MKDIR mkdir_parameters
 
-    | EXECUTE execute_parameter
     | PAUSE
 
     | REP rep_parameters"""
 
-    # Exec command
+    # Set scripts instance
     global mkdisk_instance, fdisk_instance, mkfs_instance
     global login_instance, mkusr_instance
     global mkfile_instance, mkdir_instance
     global rep_instance
 
+    # Set message
+    global message
+
     # File management
     if p[1] == "mkdisk":
-        mkdisk_instance.create_disk()
+        message = mkdisk_instance.create_disk()
     elif p[1] == "rmdisk":
-        rmdisk_instance.delete_disk()
+        message = rmdisk_instance.delete_disk()
     elif p[1] == "fdisk":
-        fdisk_instance.create_partition()
+        message = fdisk_instance.create_partition()
     elif p[1] == "mount":
-        mount_instance.mount_partition()
-    elif p[1] == "unmount":
-        unmount_instance.unmount_partition()
+        message = mount_instance.mount_partition()
     elif p[1] == "mkfs":
-        mkfs_instance.format_partition()
+        message = mkfs_instance.format_partition()
     # User management
     elif p[1] == "login":
-        login_instance.login()
+        message = login_instance.login()
     elif p[1] == "logout":
-        logout_instance.logout()
+        message = logout_instance.logout()
     elif p[1] == "mkgrp":
-        mkgrp_instance.create_group()
+        message = mkgrp_instance.create_group()
     elif p[1] == "rmgrp":
-        rmgrp_instance.remove_group()
+        message = rmgrp_instance.remove_group()
     elif p[1] == "mkusr":
-        mkusr_instance.create_user()
+        message = mkusr_instance.create_user()
     elif p[1] == "rmusr":
-        rmusr_instance.remove_user()
-    elif p[1] == "chgrp":
-        chgrp_instance.change_group()
+        message = rmusr_instance.remove_user()
     # File management
     elif p[1] == "mkfile":
-        mkfile_instance.create_file()
-    elif p[1] == "cat":
-        cat_instance.show_files()
-    elif p[1] == "remove":
-        remove_instance.remove_file()
-    elif p[1] == "edit":
-        edit_instance.edit_file()
-    elif p[1] == "rename":
-        rename_instance.rename()
+        message = mkfile_instance.create_file()
     elif p[1] == "mkdir":
-        mkdir_instance.create_folder()
+        message = mkdir_instance.create_folder()
     # Extra
-    elif p[1] == "execute":
-        exec_instance.execute_script()
     elif p[1] == "pause":
-        pause_instance.pause()
+        message = pause_instance.pause()
     # Report
     elif p[1] == "rep":
-        rep_instance.create_report()
+        message = rep_instance.create_report()
 
     # Reset scripts instance
     # -----------------------------
@@ -261,11 +238,9 @@ def p_command(p):
     mkusr_instance = MKUSR()
     # -----------------------------
     mkfile_instance = MKFILE()
-
     mkdir_instance = MKDIR()
     # -----------------------------
     rep_instance = REP()
-    # print("Comando ", p[1])
 
 
 # ------------------ MKDISK ------------------
@@ -318,9 +293,7 @@ def p_fdisk_parameter(p):
     | DASH NAME EQUAL string_parameter
     | DASH UNIT EQUAL unit_parameter
     | DASH TYPE  EQUAL type_parameter
-    | DASH FIT  EQUAL fit_parameter
-    | DASH DELETE  EQUAL delete_parameter
-    | DASH ADD  EQUAL add_parameter"""
+    | DASH FIT  EQUAL fit_parameter"""
     # Set partition instance
     global fdisk_instance
     if p[2] == "size":
@@ -335,10 +308,6 @@ def p_fdisk_parameter(p):
         fdisk_instance.type = p[4]
     elif p[2] == "fit":
         fdisk_instance.fit = p[4]
-    elif p[2] == "delete":
-        fdisk_instance.delete = p[4]
-    elif p[2] == "add":
-        fdisk_instance.add = p[4]
 
     # print("Opción:", p[2], "Valor:", p[4])
 
@@ -362,15 +331,6 @@ def p_mount_parameter(p):
     # print("Opción:", p[2], "Valor:", p[4])
 
 
-# ------------------ UNMOUNT ------------------
-def p_unmount_parameter(p):
-    "unmount_parameter : DASH ID EQUAL id_parameter"
-    # Set unmount instance
-    global unmount_instance
-    unmount_instance.id = p[4]
-    # print("Opción:", p[2], "Valor:", p[4])
-
-
 # ------------------ MKFS ------------------
 def p_mkfs_parameters(p):
     """mkfs_parameters : mkfs_parameter mkfs_parameters
@@ -380,16 +340,13 @@ def p_mkfs_parameters(p):
 
 def p_mkfs_parameter(p):
     """mkfs_parameter : DASH ID EQUAL id_parameter
-    | DASH TYPE EQUAL FULL
-    | DASH FS EQUAL fs_parameter"""
+    | DASH TYPE EQUAL FULL"""
     # Set mkfs instance
     global mkfs_instance
     if p[2] == "id":
         mkfs_instance.id = p[4]
     elif p[2] == "type":
         mkfs_instance.type = p[4]
-    elif p[2] == "fs":
-        mkfs_instance.fs = p[4]
     # print("Opción:", p[2], "Valor:", p[4])
 
 
@@ -464,25 +421,6 @@ def p_rmusr_parameter(p):
     # print("Opción:", p[2], "Valor:", p[4])
 
 
-# ------------------ CHGROUP ------------------
-def p_chgrp_parameters(p):
-    """chgrp_parameters : chgrp_parameter chgrp_parameters
-    | chgrp_parameter"""
-    pass
-
-
-def p_chgrp_parameter(p):
-    """chgrp_parameter : DASH USER EQUAL string_parameter
-    | DASH GRP EQUAL string_parameter"""
-    # Set chgrp instance
-    global chgrp_instance
-    if p[2] == "user":
-        chgrp_instance.user = p[4]
-    elif p[2] == "grp":
-        chgrp_instance.group = p[4]
-    # print("Opción:", p[2], "Valor:", p[4])
-
-
 # ------------------ MKFILE ------------------
 def p_mkfile_parameters(p):
     """mkfile_parameters : mkfile_parameter mkfile_parameters
@@ -508,68 +446,6 @@ def p_mkfile_parameter(p):
     # print("Opción:", p[2], "Valor:", p[4])
 
 
-# ------------------ CAT ------------------
-def p_cat_parameters(p):
-    """cat_parameters : cat_parameter cat_parameters
-    | cat_parameter"""
-    pass
-
-
-def p_cat_parameter(p):
-    """cat_parameter :  DASH FILE NUMBER EQUAL string_parameter"""
-    # Set cat instance
-    global cat_instance
-    if p[2] == "file":
-        cat_instance.files.append(p[5])
-    # print("Opción:", p[2], "Valor:", p[4])
-
-
-# ------------------ REMOVE ------------------
-def p_remove_parameter(p):
-    "remove_parameter : DASH PATH EQUAL string_parameter"
-    # Set remove instance
-    global remove_instance
-    remove_instance.path = p[4]
-    # print("Opción:", p[2], "Valor:", p[4])
-
-
-# ------------------ EDIT ------------------
-def p_edit_parameters(p):
-    """edit_parameters : edit_parameter edit_parameters
-    | edit_parameter"""
-    pass
-
-
-def p_edit_parameter(p):
-    """edit_parameter :  DASH PATH EQUAL string_parameter
-    | DASH CONT  EQUAL string_parameter"""
-    # Set edit instance
-    global edit_instance
-    if p[2] == "path":
-        edit_instance.path = p[4]
-    if p[2] == "cont":
-        edit_instance.cont = p[4]
-    # print("Opción:", p[2], "Valor:", p[4])
-
-
-# ------------------ RENAME ------------------
-def p_rename_parameters(p):
-    """rename_parameters : rename_parameter rename_parameters
-    | rename_parameter"""
-    pass
-
-
-def p_rename_parameter(p):
-    """rename_parameter :  DASH PATH EQUAL string_parameter
-    | DASH NAME EQUAL string_parameter"""
-    # Set rename instance
-    global rename_instance
-    if p[2] == "path":
-        rename_instance.path = p[4]
-    if p[2] == "name":
-        rename_instance.name = p[4]
-
-
 # ------------------ MKDIR ------------------
 def p_mkdir_parameters(p):
     """mkdir_parameters : mkdir_parameter mkdir_parameters
@@ -586,14 +462,6 @@ def p_mkdir_parameter(p):
         mkdir_instance.path = p[4]
     if p[2] == "r":
         mkdir_instance.r = True
-
-
-# ------------------ EXECUTE ------------------
-def p_execute_parameter(p):
-    "execute_parameter : DASH PATH EQUAL string_parameter"
-    global exec_instance
-    exec_instance.path = p[4]
-    # print("Opción:", p[2], "Valor:", p[4])
 
 
 # ------------------ REP ------------------
@@ -680,10 +548,12 @@ def p_pass_parameter(p):
 
 # ------------------ ERRORS ------------------
 def p_error(p):
+    global message
+
     if p:
-        print(Fore.RED + f"Valor no esperado en '{p.value}'")
+        message = f"[ERROR] Valor no esperado: '{p.value}.'"
     else:
-        print(Fore.RED + "Error de sintaxis en la entrada")
+        message = "[ERROR] Error de sintaxis."
 
 
 # Build grammar
@@ -695,3 +565,4 @@ parser = yacc.yacc()
 # Parse input
 def parse(input):
     parser.parse(input)
+    return message

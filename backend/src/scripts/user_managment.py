@@ -1,15 +1,11 @@
 # Libraries
 import re
-from colorama import Fore, init
 
 # Module
-from backend.src.execution import CARNET, mounted_partitions, logged
-from structs.user import Logged, User, Group
+from main import mounted_partitions, logged
+from structs.user import User
 from structs.partition import Partition, MountedPartition
 from structs.superblock import SuperBlock, SUPERBLOCK_SIZE
-
-# Inicializar Colorama
-init(autoreset=True)
 
 
 # Script to login
@@ -22,20 +18,17 @@ class LOGIN:
     def login(self):
         # Validate logged
         if logged.logged_in:
-            print(Fore.RED + "ERROR: Ya hay una sesión activa.")
-            return
+            return "[ERROR] Ya hay una sesión activa.]"
 
         # Validate mandatory parameters
         if self.user == "" or self.password == "" or self.id == "":
-            print(Fore.RED + "ERROR: Faltan parámetros obligatorios")
-            return
+            return "[ERROR] Faltan parámetros obligatorios."
 
         # Validate mounted partitions
         if self.id in mounted_partitions:
             pass
         else:
-            print(Fore.RED + f"La partición {self.id} no está montada.")
-            return
+            return f"[ERROR] La partición {self.id} no está montada."
 
         # Get mounted partition
         mounted_partition = mounted_partitions[self.id]
@@ -68,10 +61,9 @@ class LOGIN:
                             logged.mounted_partition = mounted_partition
                             logged.logged_in = True
 
-                            print(Fore.GREEN + "Login exitoso!")
-                            return
+                            return "[EXITOSO] Login exitoso."
             # Message
-            print(Fore.RED + "Login fallido!")
+            return "[ERROR] Login fallido."
 
 
 # Script to logout
@@ -86,9 +78,9 @@ class LOGOUT:
             logged.user = User()
             logged.mounted_partition = MountedPartition("", Partition())
             logged.logged_in = False
-            print(Fore.GREEN + "Logout exitoso!")
+            return "[EXITOSO] Logout exitoso."
         else:
-            print(Fore.RED + "No hay una sesión activa.")
+            return "[ERROR] No hay una sesión activa."
 
 
 # Script to mkgrp
@@ -99,13 +91,11 @@ class MKGRP:
     def create_group(self):
         # Validate logged and permissions
         if not logged.logged_in or logged.user.user_name != "root":
-            print(Fore.RED + "ERROR: No se puede crear el grupo.")
-            return
+            return "[ERROR] No se puede crear el grupo."
 
         # Validate mandatory parameters
         if self.name == "":
-            print(Fore.RED + "ERROR: Faltan parámetros obligatorios")
-            return
+            return "[ERROR] Faltan parámetros obligatorios."
 
         # Get mounted partition
         mounted_partition = logged.get_mounted_partition()
@@ -134,8 +124,7 @@ class MKGRP:
                         if not parts[2] == self.name:
                             gid += 1
                         else:
-                            print(Fore.RED + "ERROR: El grupo ya existe.")
-                            return
+                            return "[ERROR] El grupo ya existe."
 
             # Set content
             new_content = f"{str(gid)},G,{self.name}\n"
@@ -146,7 +135,7 @@ class MKGRP:
             superblock.set_users_file(file, partition.start, pointer, clean_content)
 
         # Message
-        print(Fore.GREEN + "Grupo creado exitosamente!")
+        return "[EXITOSO] Grupo creado exitosamente."
 
 
 # Script to rmgrp
@@ -157,13 +146,11 @@ class RMGRP:
     def remove_group(self):
         # Validate logged and permissions
         if not logged.logged_in or logged.user.user_name != "root":
-            print(Fore.RED + "ERROR: No se puede crear el grupo.")
-            return
+            return "[ERROR] No se puede eliminar el grupo."
 
         # Validate mandatory parameters
         if self.name == "":
-            print(Fore.RED + "ERROR: Faltan parámetros obligatorios")
-            return
+            return "[ERROR] Faltan parámetros obligatorios."
 
         # Get mounted partition
         mounted_partition = logged.get_mounted_partition()
@@ -206,7 +193,7 @@ class RMGRP:
             )
 
         # Message
-        print(Fore.GREEN + "Grupo borrado exitosamente!")
+        return "[EXITOSO] Grupo eliminado exitosamente!"
 
 
 # Script to mkusr
@@ -219,13 +206,11 @@ class MKUSR:
     def create_user(self):
         # Validate logged and permissions
         if not logged.logged_in or logged.user.user_name != "root":
-            print(Fore.RED + "ERROR: No se puede crear el usuario.")
-            return
+            return "[ERROR] No se puede crear el usuario.]"
 
         # Validate mandatory parameters
         if self.user == "" or self.password == "" or self.group == "":
-            print(Fore.RED + "ERROR: Faltan parámetros obligatorios")
-            return
+            return "[ERROR] Faltan parámetros obligatorios."
 
         # Get mounted partition
         mounted_partition = logged.get_mounted_partition()
@@ -253,8 +238,7 @@ class MKUSR:
                         if not parts[3] == self.user:
                             uid += 1
                         else:
-                            print(Fore.RED + "ERROR: El usuario ya existe.")
-                            return
+                            return "[ERROR] El usuario ya existe."
             # Exists group
             exists_group = False
             for line in content.split("\n"):
@@ -269,8 +253,7 @@ class MKUSR:
                         break
 
             if not exists_group:
-                print(Fore.RED + "ERROR: El grupo no existe.")
-                return
+                return "[ERROR] El grupo no existe."
 
             # Set content
             new_content = f"{str(uid)},U,{self.group},{self.user},{self.password}\n"
@@ -281,7 +264,7 @@ class MKUSR:
             superblock.set_users_file(file, partition.start, pointer, clean_content)
 
         # Message
-        print(Fore.GREEN + "Usuario creado exitosamente!")
+        return "[EXITOSO] Usuario creado exitosamente."
 
 
 # Script to rmusr
@@ -292,13 +275,11 @@ class RMUSR:
     def remove_user(self):
         # Validate logged and permissions
         if not logged.logged_in or logged.user.user_name != "root":
-            print(Fore.RED + "ERROR: No se puede crear el usuario.")
-            return
+            return "[ERROR] No se puede eliminar el usuario."
 
         # Validate mandatory parameters
         if self.user == "":
-            print(Fore.RED + "ERROR: Faltan el parámetro obligatorio")
-            return
+            return "[ERROR] Faltan parámetros obligatorios."
 
         # Get mounted partition
         mounted_partition = logged.get_mounted_partition()
@@ -343,82 +324,4 @@ class RMUSR:
             )
 
         # Message
-        print(Fore.GREEN + "Usuario borrado exitosamente!")
-
-
-# Script to chgrp
-class CHGRP:
-    def __init__(self):
-        self.user = ""
-        self.group = ""
-
-    def change_group(self):
-        # Validate logged and permissions
-        if not logged.logged_in or logged.user.user_name != "root":
-            print(Fore.RED + "ERROR: No se puede crear el usuario.")
-            return
-
-        # Validate mandatory parameters
-        if self.user == "" or self.group == "":
-            print(Fore.RED + "ERROR: Faltan el parámetro obligatorio")
-            return
-
-        # Get mounted partition
-        mounted_partition = logged.get_mounted_partition()
-        # Set partition
-        partition = mounted_partition.get_partition()
-
-        # Get SuperBlock
-        with open(mounted_partition.path, "rb+") as file:
-            # Set pointer
-            file.seek(partition.start)
-            # Read SuperBlock
-            packed_superblock = file.read(SUPERBLOCK_SIZE)
-            # Unpack SuperBlock
-            superblock = SuperBlock.unpack(packed_superblock)
-
-            # Find users.txt
-            content, pointer = superblock.get_users_file(file, "users.txt")
-
-            # Exists group
-            exists_group = False
-            for line in content.split("\n"):
-                if line.strip():
-                    parts = [part.strip() for part in line.split(",")]
-                    if (
-                        parts[1] == "G"
-                        and parts[2] == self.group
-                        and not parts[0] == "0"
-                    ):
-                        exists_group = True
-                        break
-
-            if not exists_group:
-                print(Fore.RED + "ERROR: El grupo no existe.")
-                return
-
-            # Lines
-            new_lines = []  # Lista para almacenar las líneas del nuevo contenido
-
-            for line in content.split("\n"):
-                if line.strip():
-                    parts = [part.strip() for part in line.split(",")]
-                    if (
-                        parts[1] == "U"
-                        and parts[3] == self.user
-                        and not parts[0] == "0"
-                    ):
-                        new_lines.append(
-                            f"{parts[0]},U,{self.group},{self.user},{parts[4]}\n"
-                        )
-                    else:
-                        new_lines.append(line)
-
-            # Crea el nuevo contenido uniendo las líneas de la lista
-            new_content = "\n".join(new_lines)
-
-            # Set the content in the file
-            superblock.set_users_file(file, partition.start, pointer, new_content)
-
-        # Message
-        print(Fore.GREEN + "Grupo cambiado exitosamente!")
+        return "[EXITOSO] Usuario eliminado exitosamente."

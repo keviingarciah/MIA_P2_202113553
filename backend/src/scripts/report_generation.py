@@ -1,20 +1,15 @@
 # Libraries
 import os
-from colorama import Fore, init
 
 # Modules
 from graphviz import Source
-from backend.src.execution import mounted_partitions
+from main import mounted_partitions
 from structs.mbr import MBR, MBR_SIZE
 from structs.ebr import EBR, EBR_SIZE
 from structs.superblock import SuperBlock, SUPERBLOCK_SIZE
 from structs.inode import Inode
 from structs.folder_block import FolderBlock
 from structs.file_block import FileBlock
-from structs.journaling import Journaling, JOURLANING_SIZE
-
-# Inicializar Colorama
-init(autoreset=True)
 
 
 # Script to create a report
@@ -28,16 +23,14 @@ class REP:
     def create_report(self):
         # Validate mandatory parameters
         if self.name == "" or self.path == "/" or self.id == " ":
-            print(Fore.RED + "ERROR: Falta un parámetro obligatorio")
-            return
+            return "[ERROR] Falta un parámetro obligatorio]"
 
         # Verificar si la clave existe
         mounted_partition = None
         if self.id in mounted_partitions:
             mounted_partition = mounted_partitions[self.id]
         else:
-            print(Fore.RED + f"La partición {self.id} no está montada.")
-            return
+            return f"[ERROR] La partición {self.id} no está montada."
 
         # Set partition
         partition = mounted_partition.get_partition()
@@ -64,19 +57,15 @@ class REP:
                 graphviz = tree_report(file, partition.start)
             elif self.name == "sb":
                 graphviz = sb_report(file, partition.start)
-            elif self.name == "journaling":
-                graphviz = journaling_report(file, partition.start + SUPERBLOCK_SIZE)
             elif self.name == "file":
                 # Validate mandatory parameters
                 if self.ruta == "/":
-                    print("ERROR: Falta un parámetro obligatorio")
-                    return
+                    return "[ERROR] Falta un parámetro obligatorio"
                 content = file_report(file, partition.start, self.ruta)
             elif self.name == "ls":
                 pass
             else:
-                print(f"El reporte {self.name} no existe.")
-                return
+                return f"[ERROR] El reporte {self.name} no existe."
 
             if (
                 self.name == "bm_inode"
@@ -107,8 +96,8 @@ class REP:
                 # Renderizar y guardar la imagen con la extensión correcta
                 graph.render(nombre_base, format=extension[1:], cleanup=True)
 
-            # Mesaage
-            print(Fore.GREEN + f"Reporte {self.name} generado con éxito.")
+            # Message
+            return f"[EXITOSO] Reporte {self.name} generado con éxito."
 
 
 # MBR report
@@ -836,51 +825,3 @@ def file_report(file, pointer, file_path):
     content = sb.get_file_content(file, path)
 
     return content
-
-
-# jornaling report
-def journaling_report(file, pointer):
-    # Set pointer
-    file.seek(pointer)
-    # Read Journaling
-    packed_journaling = file.read(JOURLANING_SIZE)
-    # Unpack Journaling
-    first_journaling = Journaling.unpack(packed_journaling)
-
-    # Begin graphviz
-    graphviz = """
-    digraph G{
-        rankdir="LR";
-        node [shape=plaintext];
-    """
-    graphviz += f"""  
-            table [label=<<table border="0" cellborder="1" cellspacing="0">
-                <tr><td colspan="4" bgcolor="#FFFFCC">Journaling</td></tr>
-                <tr><td bgcolor="#EFEFEF">Operación</td> <td bgcolor="#EFEFEF">Path</td>  <td bgcolor="#EFEFEF">Contenido</td>  <td bgcolor="#EFEFEF">Fecha</td> </tr>
-    """
-
-    # Iterate inodes
-    for i in range(0, first_journaling.count):
-        # Set pointer
-        file.seek((pointer) + (i * JOURLANING_SIZE))
-        # Read inode
-        serializeJournaling = file.read(JOURLANING_SIZE)
-        # Unpack inode
-        new_journaling = Journaling.unpack(serializeJournaling)
-
-        graphviz += f"""  
-                <tr>
-                <td>{new_journaling.content.operation}</td>
-                <td>{new_journaling.content.path}</td>
-                <td>{new_journaling.content.content}</td>
-                <td>{new_journaling.content.date}</td>
-                </tr>
-        """
-    # End of table
-    graphviz += f"""          
-            </table>>];
-        """
-    # End of graphviz
-    graphviz += "}"
-
-    return graphviz

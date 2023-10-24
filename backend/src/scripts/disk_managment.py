@@ -3,21 +3,16 @@ import datetime
 import os
 import random
 import math
-from colorama import Fore, init
 
 # Modules
-from backend.src.execution import mounted_partitions, CARNET
+from main import mounted_partitions, CARNET
 from structs.mbr import MBR, MBR_SIZE
-from structs.partition import Partition, MountedPartition
+from structs.partition import MountedPartition
 from structs.ebr import EBR, recursive_ebr_operation
 from structs.superblock import SuperBlock, SUPERBLOCK_SIZE
-from structs.inode import Inode, INODE_SIZE
-from structs.folder_block import FolderBlock, FOLDER_BLOCK_SIZE
-from structs.file_block import FileBlock, FILE_BLOCK_SIZE
-from structs.journaling import Journaling, JOURLANING_SIZE
-
-# Inicializar Colorama
-init(autoreset=True)
+from structs.inode import INODE_SIZE
+from structs.folder_block import FOLDER_BLOCK_SIZE
+from structs.journaling import JOURLANING_SIZE
 
 
 # Script to create a disk
@@ -32,13 +27,11 @@ class MKDISK:
     def create_disk(self):
         # Validate the size and path
         if self.size == 0 or self.path == "/":
-            print(Fore.RED + "Error: Size or path is not defined")
-            return
+            return "[ERROR] Falta un parámetro obligatorio."
 
         # Validate a positive size
         if self.size < 0:
-            print(Fore.RED + "Error: Size must be positive")
-            return
+            return "[ERROR] El tamaño debe ser positivo."
 
         # Obtener la carpeta donde se encuentra el archivo
         folder = os.path.dirname(self.path)
@@ -83,8 +76,8 @@ class MKDISK:
             serialized_mbr = mbr.pack()
             file.write(serialized_mbr)
 
-            # Message
-            print(Fore.GREEN + f"El disco {self.path} ha sido creado exitosamente.")
+            # Succes Message
+            return f"[EXITOSO] Se creó el disco {self.path} exitosamente."
 
 
 # Script to remove a disk
@@ -96,25 +89,14 @@ class RMDISK:
         # Verify if the file exists
         if os.path.exists(self.path):
             try:
-                # Ask for confirmation
-                confirmation = input(
-                    Fore.CYAN
-                    + f"¿Está seguro que desea eliminar el disco {self.path}? (S/N): "
-                )
-                if confirmation.upper() != "S":
-                    print(Fore.RED + "Operación cancelada.")
-                    return
-                else:
-                    # Delete the file
-                    os.remove(self.path)
-                    print(
-                        Fore.GREEN
-                        + f"El disco {self.path} ha sido eliminado exitosamente."
-                    )
+                # Delete the file
+                os.remove(self.path)
+                return f"[EXITOSO] El disco {self.path} ha sido eliminado exitosamente."
+
             except Exception as e:
-                print(Fore.RED + f"No se pudo disco el archivo {self.path}. Error: {e}")
+                return f"No se pudo eliminar el disco {self.path}. Error: {e}"
         else:
-            print(Fore.RED + f"El disco {self.path} no existe.")
+            return f"El disco {self.path} no existe."
 
 
 # Script to create a partition
@@ -133,13 +115,11 @@ class FDISK:
     def create_partition(self):
         # Validate the size and path
         if self.size == 0 or self.path == "/":
-            print(Fore.RED + "Error: Size or path is not defined")
-            return
+            return "[ERROR] Falta un parámetro obligatorio."
 
         # Validate a positive size
         if self.size < 0:
-            print(Fore.RED + "Error: Size must be positive")
-            return
+            return "[ERROR] El tamaño debe ser positivo."
 
         # Get the partition size
         partition_size = self.size
@@ -179,12 +159,9 @@ class FDISK:
                     file.write(serialized_mbr)
 
                     # Message
-                    print(
-                        Fore.GREEN
-                        + f"La partición primaria {self.name} ha sido creada exitosamente."
-                    )
+                    return f"[EXITOSO] La partición primaria {self.name} ha sido creada exitosamente."
                 else:
-                    print(Fore.RED + "No se pudo crear la partición primaria.")
+                    return "[ERROR] No se pudo crear la partición primaria."
 
             elif self.type == "E":
                 # Create the EBR
@@ -205,12 +182,9 @@ class FDISK:
                     file.write(serialized_ebr)
 
                     # Message
-                    print(
-                        Fore.GREEN
-                        + f"La partición extendida {self.name} ha sido creada exitosamente."
-                    )
+                    return f"[EXITOSO] La partición extendida {self.name} ha sido creada exitosamente."
                 else:
-                    print(Fore.RED + "No se pudo crear la partición extendida.")
+                    return "[ERROR] No se pudo crear la partición extendida."
 
             elif self.type == "L":
                 # Set logical partition data (EBR)
@@ -222,12 +196,9 @@ class FDISK:
                     )
 
                     # Message
-                    print(
-                        Fore.GREEN
-                        + f"La partición lógica {self.name} ha sido creada exitosamente."
-                    )
+                    return f"[EXITOSO] La partición lógica {self.name} ha sido creada exitosamente."
                 else:
-                    print(Fore.RED + "No se pudo crear la partición lógica.")
+                    return "[ERROR] No se pudo crear la partición lógica."
 
 
 # Script to mount partitions
@@ -239,8 +210,7 @@ class MOUNT:
     def mount_partition(self):
         # Validate the name and path
         if self.name == " " or self.path == "/":
-            print(Fore.RED + "Error: Name or path is not defined")
-            return
+            return "[ERROR] Falta un parámetro obligatorio."
 
         # Read the file
         with open(self.path, "rb+") as file:
@@ -258,40 +228,15 @@ class MOUNT:
             partition_id = CARNET + str(partition_index) + disk_name
 
             if partition_id in mounted_partitions:
-                print(
-                    Fore.RED + f"La partición {partition_id} ya se encuentra montada."
-                )
+                return "[ERROR] La partición ya se encuentra montada."
             else:
                 # Set mounted partition
                 mounted_partition = MountedPartition(self.path, partition)
                 # Add the partition to the global dictionary
                 mounted_partitions[partition_id] = mounted_partition
-                # print("ID: ", partition_id)
 
                 # Message
-                print(
-                    Fore.GREEN
-                    + f"La partición {partition_id} ha sido montada exitosamente."
-                )
-
-
-# Script to unmount partitions
-class UNMOUNT:
-    def __init__(self):
-        self.id = " "
-
-    def unmount_partition(self):
-        # Validate the id
-        if self.id == " ":
-            print(Fore.RED + "Error: Id is not defined")
-            return
-
-        # Verificar si la clave existe antes de eliminarla
-        if self.id in mounted_partitions:
-            del mounted_partitions[self.id]
-            print(Fore.GREEN + f"Se desmontó la particion {self.id}.")
-        else:
-            print(Fore.RED + f"La partición {self.id} no está montada.")
+                return f"[EXITOSO] La partición {partition_id} ha sido montada exitosamente."
 
 
 # Script to format partitions
@@ -304,15 +249,13 @@ class MKFS:
     def format_partition(self):
         # Validate the id
         if self.id == " ":
-            print("Error: Id is not defined")
-            return
+            return "[ERROR] Falta un parámetro obligatorio."
 
         # Validate mounted partitions
         if self.id in mounted_partitions:
             pass
         else:
-            print(f"La clave {self.id} no existe en el diccionario.")
-            return
+            return "[ERROR] La partición no está montada."
 
         # Get mounted partition
         mounted_partition = mounted_partitions[self.id]
@@ -346,15 +289,5 @@ class MKFS:
         new_superblock.unmount_time = date
         new_superblock.mount_count = 1
 
-        if self.fs == "2fs":
-            new_superblock.create_ext2(n, partition, mounted_partition.path)
-            print(
-                Fore.GREEN
-                + "Se formateó la partición exitosamente con el formato ext2."
-            )
-        elif self.fs == "3fs":
-            new_superblock.create_ext3(n, partition, mounted_partition.path)
-            print(
-                Fore.GREEN
-                + "Se formateó la partición exitosamente con el formato ext3."
-            )
+        new_superblock.create_ext2(n, partition, mounted_partition.path)
+        return "[EXITOSO] Se formateó la partición exitosamente con el formato ext2."
