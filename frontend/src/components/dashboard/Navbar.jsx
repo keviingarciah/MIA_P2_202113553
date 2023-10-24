@@ -7,9 +7,9 @@ const Navbar = () => {
       <div className="container-fluid">
         <a className="navbar-brand" style={{ color: 'white' }}>MIA | Proyecto 2</a>
       
-        <div class="collapse navbar-collapse" id="navbarNavDropdown">
-            <ul class="navbar-nav">
-                <li class="nav-item">
+        <div className="collapse navbar-collapse" id="navbarNavDropdown">
+            <ul className="navbar-nav">
+                <li className="nav-item">
                     <Link to="/reports" className="nav-link text-white">Reportes</Link>
                 </li>
             </ul>    

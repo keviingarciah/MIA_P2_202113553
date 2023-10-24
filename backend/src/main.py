@@ -3,12 +3,11 @@ from flask_cors import CORS
 import time
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/execute": {"origins": "http://localhost:5173"}})
 
 # Respuesta de ejemplo
 respuesta = {
-    "estado": "OK",
-    "mensaje": "[Success] => Disco creado correctamente",
+    "mensaje": "[Success] => Backend levantado correctamente.",
 }
 
 
@@ -18,28 +17,24 @@ def obtener_productos():
     return jsonify(respuesta)
 
 
+# Ruta para ejecutar el código
 @app.route("/execute", methods=["POST"])
-def get_first_word():
+def execute_code():
+    # Obtener el mensaje enviado por el cliente
     data = request.get_json()
-    message = data.get("command", "")
 
-    # Dividir el mensaje en palabras
-    words = message.split()
+    #  Obtener script enviado por el cliente
+    content = data.get("inputText", "")
 
-    if words:
-        message = f"[Success] => comando {words[0]} ejecutado exitosamente"
-    else:
-        message = "No se encontraron palabras en el mensaje."
+    # print(content)
 
-    respuesta = {
-        "estado": "OK",
-        "mensaje": message,
-    }
+    # Aquí puedes ejecutar el código y obtener la salida
+    output = content
 
     # Esperamos 1 segundo, para simular proceso de ejecución
-    time.sleep(1)
+    # time.sleep(1)
 
-    return jsonify(respuesta)
+    return jsonify({"message": output})
 
 
 if __name__ == "__main__":

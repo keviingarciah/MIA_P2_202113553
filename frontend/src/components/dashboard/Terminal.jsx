@@ -1,27 +1,82 @@
 import React, { useState } from 'react';
+const API = import.meta.env.VITE_APP_BACKEND
 
 const Terminal = () => {
-  const [inputText, setInputText] = useState(''); // Estado para almacenar el contenido del archivo
+  const [inputText, setInputText] = useState('');
+  const [outputText, setOutputText] = useState('');
+  const [isExecuting, setIsExecuting] = useState(false); // Estado para el indicador de ejecución
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     const reader = new FileReader();
 
     reader.onload = (event) => {
-      const fileContent = event.target.result; // Contenido del archivo
-
-      setInputText(fileContent); // Actualiza el estado con el contenido del archivo
+      const fileContent = event.target.result;
+      setInputText(fileContent);
     };
 
     reader.readAsText(file);
   };
 
   const handleTextareaChange = (e) => {
-    const newText = e.target.value; // Nuevo contenido del textarea
-
-    setInputText(newText); // Actualiza el estado con el nuevo contenido
+    const newText = e.target.value;
+    setInputText(newText);
   };
 
+  const executeCode = async () => {
+    setOutputText(''); // Limpia el contenido de salida
+
+    if (isExecuting) {
+      return;
+    }
+  
+    setIsExecuting(true);
+  
+    const inputLines = inputText.split('\n');
+    const outputLines = [];
+    let currentIndex = 0;
+    
+    while (currentIndex < inputLines.length) {
+      const line = inputLines[currentIndex].trim();
+      
+      if (line.toLowerCase() === "pause") {
+        alert("Se encontró la palabra 'pause'. La ejecución se detendrá temporalmente.");
+        currentIndex++; // Salta a la siguiente línea
+        continue; // Salta al siguiente ciclo del bucle
+      }
+  
+      try {
+        const response = await fetch(`${API}/execute`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ inputText: line }),
+        });
+  
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+  
+        const data = await response.json();
+        if (data.message) {
+          outputLines.push(data.message);
+          setOutputText(outputLines.join('\n'));
+        } else {
+          console.error('Response does not contain the expected message:', data);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        outputLines.push(`Error: ${error.message}`);
+      }
+  
+      currentIndex++; // Avanza al siguiente índice para procesar la siguiente línea
+    }
+    
+    setIsExecuting(false);
+  };
+  
+    
   return (
     <div className="card">
       <div className="card-body bg-success-subtle">
@@ -35,7 +90,11 @@ const Terminal = () => {
             />
           </div>
           <div className="col-1">
-            <button type="button" className="btn btn-success me-3">
+            <button
+              type="button"
+              className="btn btn-success me-3"
+              onClick={executeCode} // Llama a executeCode al hacer clic en el botón
+            >
               Ejecutar
             </button>
           </div>
@@ -48,15 +107,23 @@ const Terminal = () => {
             className="form-control"
             id="exampleFormControlTextarea1"
             rows="8"
-            value={inputText} // Asigna el valor del estado al textarea
-            onChange={handleTextareaChange} // Maneja los cambios en el textarea
+            value={inputText}
+            onChange={handleTextareaChange}
+            spellCheck="false" // Desactivar revisión ortográfica
           ></textarea>
         </div>
         <div className="mb-3">
           <label htmlFor="exampleFormControlTextarea1" className="form-label">
             Salida
           </label>
-          <textarea className="form-control" id="exampleFormControlTextarea1" rows="8"></textarea>
+          <textarea
+            className="form-control"
+            id="exampleFormControlTextarea1"
+            rows="8"
+            readOnly // Hace que el textarea sea de solo lectura
+            value={outputText} // Muestra el contenido de salida en el textarea
+            spellCheck="false" // Desactivar revisión ortográfica
+          ></textarea>
         </div>
       </div>
     </div>
