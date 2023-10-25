@@ -118,9 +118,6 @@ import ply.lex as lex
 lexer = lex.lex()
 
 # --------------------------- GRAMMAR ---------------------------
-# Librerías
-from colorama import Fore, init
-
 # Imports
 from scripts.disk_managment import MKDISK, FDISK, RMDISK, MOUNT, MKFS
 from scripts.user_managment import LOGIN, LOGOUT, MKGRP, RMGRP, MKUSR, RMUSR
@@ -130,9 +127,6 @@ from scripts.report_generation import REP
 
 # Mensaje
 message = "Inicializando..."
-
-# Inicializar Colorama
-init(autoreset=True)
 
 # Disk Management
 mkdisk_instance = MKDISK()
