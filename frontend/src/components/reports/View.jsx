@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Dropdown from 'react-bootstrap/Dropdown';
+
 const API = import.meta.env.VITE_APP_BACKEND
 const Bucket = import.meta.env.VITE_APP_BUCKET_REPORTS
 
@@ -45,7 +46,7 @@ const View = () => {
               <img
                 //src={`URL_de_la_Imagen/${selectedFile}`}
                 src={`${Bucket}/${selectedFile}`}
-                alt="Reporte"
+                alt="  "
                 style={{ width: '100%' }} // Ajustar el ancho al 100%
               />          
           </div>

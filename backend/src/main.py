@@ -29,7 +29,8 @@ CORS(
     app,
     resources={
         r"/execute": {"origins": "http://localhost:5173"},
-        r"/reports": {"origins": "http://localhost:5173"},  # Agregamos /reports
+        r"/reports": {"origins": "http://localhost:5173"},
+        r"/login": {"origins": "http://localhost:5173"},
     },
 )
 
@@ -55,6 +56,35 @@ def execute_code():
 
     # Ejecutar el código
     message = analyzer.parse(script)
+
+    return jsonify({"message": message})
+
+
+# Ruta para login
+@app.route("/login", methods=["POST"])
+def login():
+    # Obtener el mensaje enviado por el cliente
+    data = request.get_json()
+
+    # print(data)
+
+    # Obtener los parámetros
+    username = data.get("username", "")
+    password = data.get("password", "")
+    partitionId = data.get("id", "")
+
+    """
+    print(username)
+    print(password)
+    print(partitionId)
+    """
+
+    script = f"login -user={username} -pass={password} -id={partitionId}"
+
+    # Iniciar sesión
+    message = analyzer.parse(script)
+
+    # print(message)
 
     return jsonify({"message": message})
 

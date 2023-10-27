@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
+
+import { useLogged } from '../login/Logged';
 const API = import.meta.env.VITE_APP_BACKEND
 
 const Terminal = () => {
   const [inputText, setInputText] = useState('');
   const [outputText, setOutputText] = useState('');
   const [isExecuting, setIsExecuting] = useState(false); // Estado para el indicador de ejecución
+
+  const { isLogged, setToTrue, setToFalse } = useLogged();
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -65,13 +69,6 @@ const Terminal = () => {
           alert("[PAUSA] Oprime el botón para continuar.");
           resolve(); // Continuar cuando se resuelva la promesa (cuando el usuario cierre la alerta)
         });
-      }
-
-      if (line.toLowerCase().startsWith("rep")) {
-        // La línea comienza con "rep", ahora obten la última palabra de inputText
-        const words = inputText.split(' '); // Divide inputText en palabras
-        const reportName = words[words.length - 1]; // Obtiene la última palabra
-        // Ahora puedes hacer algo con lastWord
       }
     }  
     setIsExecuting(false);

@@ -85,7 +85,7 @@ class MKFILE:
                     file.write(serialized_journaling)
 
                 # Message
-                return "[SUCCESS] Archivo creado con éxito."
+                return "[EXITOSO] Archivo creado con éxito."
 
 
 # Script to create a folder
@@ -148,4 +148,4 @@ class MKDIR:
                 file.write(serialized_journaling)
 
         # Message
-        return "[SUCCESS] Carpeta creada con éxito."
+        return "[EXITOSO] Carpeta creada con éxito."
