@@ -27,7 +27,6 @@ const Terminal = () => {
     if (isExecuting) {
       return;
     }
-  
     setIsExecuting(true);
   
     const inputLines = inputText.split('\n');
@@ -36,8 +35,6 @@ const Terminal = () => {
     for (let i = 0; i < inputLines.length; i++) {
       const line = inputLines[i].trim();
       
-
-  
       try {
         const response = await fetch(`${API}/execute`, {
           method: 'POST',
@@ -69,12 +66,19 @@ const Terminal = () => {
           resolve(); // Continuar cuando se resuelva la promesa (cuando el usuario cierre la alerta)
         });
       }
+
+      if (line.toLowerCase().startsWith("rep")) {
+        // La línea comienza con "rep", ahora obten la última palabra de inputText
+        const words = inputText.split(' '); // Divide inputText en palabras
+        const reportName = words[words.length - 1]; // Obtiene la última palabra
+        // Ahora puedes hacer algo con lastWord
+      }
     }  
     setIsExecuting(false);
   };  
     
   return (
-    <div className="card">
+    <div className="card mb-4">
       <div className="card-body bg-success-subtle">
         <div className="row mb-3">
           <div className="col-11">

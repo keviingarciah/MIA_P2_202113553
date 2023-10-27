@@ -6,7 +6,7 @@ const Reports = () => {
   return (   
     <div> 
       <Navbar /> 
-      <div className="container-fluid mt-5">
+      <div className="container-fluid mt-4">
         <View />
       </div>  
     </div>    

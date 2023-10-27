@@ -5,6 +5,7 @@ from flask_cors import CORS
 # Modules
 from analyzer import analyzer
 from structs.user import Logged
+from upload_report import reports
 
 # Global variables
 CARNET = "53"
@@ -24,7 +25,13 @@ def update_message(new_message):
 
 # Backend
 app = Flask(__name__)
-CORS(app, resources={r"/execute": {"origins": "http://localhost:5173"}})
+CORS(
+    app,
+    resources={
+        r"/execute": {"origins": "http://localhost:5173"},
+        r"/reports": {"origins": "http://localhost:5173"},  # Agregamos /reports
+    },
+)
 
 
 # Ruta para obtener el estado del backend
@@ -50,6 +57,15 @@ def execute_code():
     message = analyzer.parse(script)
 
     return jsonify({"message": message})
+
+
+# Ruta para obtener reportes
+@app.route("/reports", methods=["GET"])
+def get_reports():
+    # print(reports)
+
+    # Se retornan los reportes
+    return jsonify({"reports": reports})
 
 
 # Main

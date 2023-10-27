@@ -1,9 +1,10 @@
 # Libraries
 import os
+from graphviz import Source
 
 # Modules
-from graphviz import Source
 from main import mounted_partitions
+from upload_report import upload_report_file
 from structs.mbr import MBR, MBR_SIZE
 from structs.ebr import EBR, EBR_SIZE
 from structs.superblock import SuperBlock, SUPERBLOCK_SIZE
@@ -50,9 +51,9 @@ class REP:
             elif self.name == "block":
                 graphviz = block_report(file, partition.start)
             elif self.name == "bm_inode":
-                content = bm_inode_report(file, partition.start)
+                graphviz = bm_inode_report(file, partition.start)
             elif self.name == "bm_block":
-                content = bm_block_report(file, partition.start)
+                graphviz = bm_block_report(file, partition.start)
             elif self.name == "tree":
                 graphviz = tree_report(file, partition.start)
             elif self.name == "sb":
@@ -61,43 +62,32 @@ class REP:
                 # Validate mandatory parameters
                 if self.ruta == "/":
                     return "[ERROR] Falta un parámetro obligatorio"
-                content = file_report(file, partition.start, self.ruta)
-            elif self.name == "ls":
-                pass
+                graphviz = file_report(file, partition.start, self.ruta)
             else:
                 return f"[ERROR] El reporte {self.name} no existe."
 
-            if (
-                self.name == "bm_inode"
-                or self.name == "bm_block"
-                or self.name == "file"
-            ):
-                # Verificar si el directorio de salida existe, si no, crearlo
-                output_dir = os.path.dirname(self.path)
-                if not os.path.exists(output_dir):
-                    os.makedirs(output_dir)
+            # Verificar si el directorio de salida existe, si no, crearlo
+            output_dir = os.path.dirname(self.path)
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
 
-                # Write the bitmap content to the output file
-                with open(self.path, "w") as output_file:
-                    output_file.write(content)
+            # Obtener la extensión del archivo desde el output_path
+            nombre_base, extension = os.path.splitext(self.path)
 
-            else:
-                # Verificar si el directorio de salida existe, si no, crearlo
-                output_dir = os.path.dirname(self.path)
-                if not os.path.exists(output_dir):
-                    os.makedirs(output_dir)
+            # Generar la imagen a partir del código DOT de Graphviz
+            graph = Source(graphviz)
 
-                # Obtener la extensión del archivo desde el output_path
-                nombre_base, extension = os.path.splitext(self.path)
+            # Renderizar y guardar la imagen con la extensión correcta
+            graph.render(nombre_base, format=extension[1:], cleanup=True)
 
-                # Generar la imagen a partir del código DOT de Graphviz
-                graph = Source(graphviz)
+            # Upload to AWS
+            upload_report_file(self.path)
 
-                # Renderizar y guardar la imagen con la extensión correcta
-                graph.render(nombre_base, format=extension[1:], cleanup=True)
+            # Get file name
+            file_name = os.path.basename(self.path)
 
             # Message
-            return f"[EXITOSO] Reporte {self.name} generado con éxito."
+            return f"[EXITOSO] Reporte {self.name} generado con éxito: {file_name}"
 
 
 # MBR report
@@ -517,24 +507,43 @@ def bm_inode_report(file, pointer):
     # Calculate the number of inodes
     total_inodes = sb.bitmap_block_start - sb.bitmap_inode_start
 
-    # Create a string to store the bitmap content
-    bitmap_content = ""
-
     # Get the inode bitmap
+    bitmap_content = ""  # Inicializa la cadena del bitmap
+
     for i in range(total_inodes):
-        # Set pointer
+        # Establece el puntero
         file.seek(sb.bitmap_inode_start + i)
-        # Read byte (character '0' or '1')
+        # Lee un byte (carácter '0' o '1')
         char = file.read(1).decode()
 
-        # Append the character to the bitmap content
+        # Agrega el carácter al contenido del bitmap
         bitmap_content += char
 
-        # Add a newline character every 20 characters (20 inodes)
+        # Agrega un carácter de nueva línea cada 20 caracteres (20 inodos)
         if (i + 1) % 20 == 0:
             bitmap_content += "\n"
 
-    return bitmap_content
+    # Separate the content in lines
+    content = bitmap_content.replace("\n", "<br/>")
+
+    # Generate the graphviz code
+    graphviz = """
+    digraph G {{
+        node [shape=box, width=2, style="rounded,filled", fillcolor="lightgray"]
+        Content [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+    """
+    graphviz += f"""   
+            <TR><TD WIDTH="200" HEIGHT="100" ALIGN="LEFT" VALIGN="TOP">{content}</TD></TR>
+    """
+
+    graphviz += """        
+        </TABLE>>]
+    }}
+    """
+
+    # print(graphviz)
+
+    return graphviz
 
 
 # Bitmap Block report
@@ -553,20 +562,42 @@ def bm_block_report(file, pointer):
     bitmap_content = ""
 
     # Get the inode bitmap
+    bitmap_content = ""  # Inicializa la cadena del bitmap
+
     for i in range(total_blocks):
-        # Set pointer
-        file.seek(sb.bitmap_block_start + i)
-        # Read byte (character '0' or '1')
+        # Establece el puntero
+        file.seek(sb.bitmap_inode_start + i)
+        # Lee un byte (carácter '0' o '1')
         char = file.read(1).decode()
 
-        # Append the character to the bitmap content
+        # Agrega el carácter al contenido del bitmap
         bitmap_content += char
 
-        # Add a newline character every 20 characters (20 inodes)
+        # Agrega un carácter de nueva línea cada 20 caracteres (20 inodos)
         if (i + 1) % 20 == 0:
             bitmap_content += "\n"
 
-    return bitmap_content
+    # Separate the content in lines
+    content = bitmap_content.replace("\n", "<br/>")
+
+    # Generate the graphviz code
+    graphviz = """
+    digraph G {{
+        node [shape=box, width=2, style="rounded,filled", fillcolor="lightgray"]
+        Content [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+    """
+    graphviz += f"""   
+            <TR><TD WIDTH="200" HEIGHT="100" ALIGN="LEFT" VALIGN="TOP">{content}</TD></TR>
+    """
+
+    graphviz += """        
+        </TABLE>>]
+    }}
+    """
+
+    # print(graphviz)
+
+    return graphviz
 
 
 # Tree report
@@ -824,4 +855,22 @@ def file_report(file, pointer, file_path):
     # Get the content of the file
     content = sb.get_file_content(file, path)
 
-    return content
+    # Separate the content in lines
+    content = content.replace("\n", "<br/>")
+
+    # Generate the graphviz code
+    graphviz = """
+    digraph G {{
+        node [shape=box, width=2, style="rounded,filled", fillcolor="lightgray"]
+        Content [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+    """
+    graphviz += f"""   
+            <TR><TD WIDTH="200" HEIGHT="100" ALIGN="LEFT" VALIGN="TOP">{content}</TD></TR>
+    """
+
+    graphviz += """        
+        </TABLE>>]
+    }}
+    """
+
+    return graphviz
