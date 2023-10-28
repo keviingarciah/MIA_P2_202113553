@@ -1,22 +1,40 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-import { useLogged } from '../login/Logged';
+const API = import.meta.env.VITE_APP_BACKEND;
 
 const Navbar = () => {
-  const { isLogged, setToTrue, setToFalse } = useLogged();
+  // Modifica handleSessionCheck para que retorne el valor de data.logged
+  const handleSessionCheck = async () => {
+    try {
+      const response = await fetch(`${API}/session`);
 
-  const handleReportLinkClick = () => {
-    if (!isLogged) {
-      alert('[ERROR] Debes iniciar sesión para ver los reportes.');
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Estado de la sesión:", data.logged);
+        return data.logged;
+      } else {
+        console.error("Error al obtener el estado de la sesión");
+        return false;
+      }
+    } catch (error) {
+      console.error("Error de red:", error);
+      return false;
     }
   };
 
-  const handleLoginLinkClick = () => {
+  const handleReportButtonClick = async () => {
+    // Realizar la petición al backend cuando se hace clic en el botón "Reportes".
+    const isLogged = await handleSessionCheck();
     if (isLogged) {
-      alert('[ERROR] Hay una sesión iniciada.');
+      // Redirige a la página de informes
+      window.location.href = '/reports';
+    } else {
+      alert('[ERROR] Debes iniciar sesión para ver los reportes.');
+      window.location.href = '#/';
     }
   };
+
 
   return (
     <nav className="navbar bg-success navbar-expand-lg">
@@ -28,29 +46,17 @@ const Navbar = () => {
         <div className="collapse navbar-collapse" id="navbarNavDropdown">
           <ul className="navbar-nav">
             <li className="nav-item">
-              {isLogged ? (
-                <Link to="/reports" className="nav-link text-white" onClick={handleReportLinkClick}>
-                  Reportes
-                </Link>
-              ) : (
-                <a href="#/" className="nav-link text-white" onClick={handleReportLinkClick}>
-                  Reportes
-                </a>
-              )}
+              <button className="nav-link text-white" onClick={handleReportButtonClick}>
+                Reportes
+              </button>
             </li>
           </ul>
         </div>
 
         <form className="d-flex" role="login">
-          {isLogged ? (
-            <a href="#/" className="btn btn-outline-light me-2" onClick={handleLoginLinkClick}>
+          <Link to="/login" className="btn btn-outline-light me-2">
               Iniciar Sesión
-            </a>
-          ) : (
-            <Link to="/login" className="btn btn-outline-light me-2">
-              Iniciar Sesión
-            </Link>
-          )}
+          </Link>
         </form>
       </div>
     </nav>

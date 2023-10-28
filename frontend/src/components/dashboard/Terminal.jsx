@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
 
-import { useLogged } from '../login/Logged';
 const API = import.meta.env.VITE_APP_BACKEND
 
 const Terminal = () => {
   const [inputText, setInputText] = useState('');
   const [outputText, setOutputText] = useState('');
   const [isExecuting, setIsExecuting] = useState(false); // Estado para el indicador de ejecución
-
-  const { isLogged, setToTrue, setToFalse } = useLogged();
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
