@@ -17,6 +17,16 @@ pip install colorama
 pip install ply
 pip install python-dotenv
 ```
+### AWS
+server {
+    listen 80;
+    server_name 3.147.44.28;
+    location / {
+        proxy_pass http://127.0.0.1:5000;
+    }
+}
+
+http://3.147.44.28
 
 ## Frontend
 ```
