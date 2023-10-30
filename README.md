@@ -15,6 +15,7 @@ pip install flask-cors
 pip install graphviz
 pip install colorama
 pip install ply
+pip install python-dotenv
 ```
 
 ## Frontend

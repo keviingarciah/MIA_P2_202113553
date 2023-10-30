@@ -1,6 +1,9 @@
 # Libraries
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+import boto3
+from dotenv import load_dotenv
+import os
 
 # Modules
 from main import logged
@@ -13,10 +16,10 @@ app = Flask(__name__)
 CORS(
     app,
     resources={
-        r"/execute": {"origins": "http://localhost:5173"},
-        r"/reports": {"origins": "http://localhost:5173"},
-        r"/login": {"origins": "http://localhost:5173"},
-        r"/session": {"origins": "http://localhost:5173"},
+        r"/execute": {"origins": os.getenv("FRONTEND_URL")},
+        r"/reports": {"origins": os.getenv("FRONTEND_URL")},
+        r"/login": {"origins": os.getenv("FRONTEND_URL")},
+        r"/session": {"origins": os.getenv("FRONTEND_URL")},
     },
 )
 
