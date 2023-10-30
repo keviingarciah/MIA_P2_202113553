@@ -1,7 +1,6 @@
 # Libraries
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-import boto3
 from dotenv import load_dotenv
 import os
 
@@ -13,23 +12,7 @@ from upload_report import reports
 
 # Backend
 app = Flask(__name__)
-CORS(
-    app,
-    resources={
-        r"/execute": {
-            "origins": "http://mia-proyecto2-202113553-frontend.s3-website.us-east-2.amazonaws.com"
-        },
-        r"/reports": {
-            "origins": "http://mia-proyecto2-202113553-frontend.s3-website.us-east-2.amazonaws.com"
-        },
-        r"/login": {
-            "origins": "http://mia-proyecto2-202113553-frontend.s3-website.us-east-2.amazonaws.com"
-        },
-        r"/session": {
-            "origins": "http://mia-proyecto2-202113553-frontend.s3-website.us-east-2.amazonaws.com"
-        },
-    },
-)
+CORS(app)
 
 
 # Ruta para obtener el estado del backend
