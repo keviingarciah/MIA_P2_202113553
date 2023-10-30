@@ -17,24 +17,16 @@ CORS(
     app,
     resources={
         r"/execute": {
-            "origins": os.getenv(
-                "http://mia-proyecto2-202113553-frontend.s3-website.us-east-2.amazonaws.com"
-            )
+            "origins": "http://mia-proyecto2-202113553-frontend.s3-website.us-east-2.amazonaws.com"
         },
         r"/reports": {
-            "origins": os.getenv(
-                "http://mia-proyecto2-202113553-frontend.s3-website.us-east-2.amazonaws.com"
-            )
+            "origins": "http://mia-proyecto2-202113553-frontend.s3-website.us-east-2.amazonaws.com"
         },
         r"/login": {
-            "origins": os.getenv(
-                "http://mia-proyecto2-202113553-frontend.s3-website.us-east-2.amazonaws.com"
-            )
+            "origins": "http://mia-proyecto2-202113553-frontend.s3-website.us-east-2.amazonaws.com"
         },
         r"/session": {
-            "origins": os.getenv(
-                "http://mia-proyecto2-202113553-frontend.s3-website.us-east-2.amazonaws.com"
-            )
+            "origins": "http://mia-proyecto2-202113553-frontend.s3-website.us-east-2.amazonaws.com"
         },
     },
 )
