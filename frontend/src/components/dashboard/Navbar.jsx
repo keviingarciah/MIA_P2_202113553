@@ -1,9 +1,11 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const API = import.meta.env.VITE_APP_BACKEND;
 
 const Navbar = () => {
+  const history = useNavigate();
+
   // Modifica handleSessionCheck para que retorne el valor de data.logged
   const handleSessionCheck = async () => {
     try {
@@ -28,10 +30,10 @@ const Navbar = () => {
     const isLogged = await handleSessionCheck();
     if (isLogged) {
       // Redirige a la página de informes
-      window.location.href = '/reports';
+      history('/reports');
     } else {
       alert('[ERROR] Debes iniciar sesión para ver los reportes.');
-      window.location.href = '#/';
+      history('/');
     }
   };
 

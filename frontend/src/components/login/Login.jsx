@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const API = import.meta.env.VITE_APP_BACKEND;
 
@@ -7,6 +7,8 @@ const Login = () => {
   const [user, setUser] = useState('');
   const [password, setPassword] = useState('');
   const [partitionId, setPartitionId] = useState('');
+
+  const history = useNavigate();
   
   const handleLogin = async () => {
     // Construir el cuerpo de la solicitud con los datos del usuario
@@ -35,9 +37,9 @@ const Login = () => {
           //console.log('Solicitud exitosa:', data);
           alert("[EXITOSO] Inicio de sesión correcto.");
 
-          // Redirige a la página de informes
-          window.location.href = '/reports';
-
+          // Redirige a la página de informes        
+          history('/reports');
+          
         } else {
           //console.error('Respuesta inesperada:', data);
           alert("[ERROR] Ocurrió un error al iniciar sesión.");       
