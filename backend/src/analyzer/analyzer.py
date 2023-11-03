@@ -26,6 +26,7 @@ reserved = {
     # Extra commands
     "execute": "EXECUTE",
     "pause": "PAUSE",
+    "mounted": "MOUNTED",
     # Report commands
     "rep": "REP",
     # Parameters
@@ -122,7 +123,7 @@ lexer = lex.lex()
 from scripts.disk_managment import MKDISK, FDISK, RMDISK, MOUNT, MKFS
 from scripts.user_managment import LOGIN, LOGOUT, MKGRP, RMGRP, MKUSR, RMUSR
 from scripts.file_managment import MKDIR, MKFILE
-from scripts.extra import PAUSE
+from scripts.extra import PAUSE, MOUNTED
 from scripts.report_generation import REP
 
 # Mensaje
@@ -146,6 +147,7 @@ mkdir_instance = MKDIR()
 mkfile_instance = MKFILE()
 # Extra
 pause_instance = PAUSE()
+mounted_instance = MOUNTED()
 # Report
 rep_instance = REP()
 
@@ -174,6 +176,7 @@ def p_command(p):
     | MKDIR mkdir_parameters
 
     | PAUSE
+    | MOUNTED
 
     | REP rep_parameters"""
 
@@ -218,6 +221,8 @@ def p_command(p):
     # Extra
     elif p[1] == "pause":
         message = pause_instance.pause()
+    elif p[1] == "mounted":
+        message = mounted_instance.mounted()
     # Report
     elif p[1] == "rep":
         message = rep_instance.create_report()
